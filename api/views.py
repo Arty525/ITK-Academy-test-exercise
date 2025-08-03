@@ -1,7 +1,7 @@
-from rest_framework import status, generics
-from rest_framework.response import Response
+from rest_framework import generics
 from api.models import Wallet
 from api.serializers import WalletUpdateSerializer, WalletSerializer
+from .services import change_wallet_amount
 
 
 class WalletListAPIView(generics.ListAPIView):
@@ -25,22 +25,10 @@ class WalletUpdateAPIView(generics.UpdateAPIView):
 
     def post(self, request, pk):
         wallet = self.get_object()
-        if request.data['amount'] <= 0:
-            return Response({'error': 'Amount cannot be less than zero'}, status=status.HTTP_400_BAD_REQUEST)
-        if request.data['operation_type'] == 'DEPOSIT':
-            request.data['amount'] = request.data['amount'] + wallet.amount
-        elif request.data['operation_type'] == 'WITHDRAW':
-            if request.data['amount'] > wallet.amount:
-                return Response({'error': 'There are insufficient funds in the wallet'},
-                                status=status.HTTP_400_BAD_REQUEST)
-            request.data['amount'] = wallet.amount - request.data['amount']
-        else:
-            return Response({'error': 'Invalid operation_type'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = WalletUpdateSerializer(wallet, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        amount = int(request.data["amount"])
+        operation_type = request.data["operation_type"]
+        return change_wallet_amount(wallet, amount, operation_type)
+
 
 class WalletDeleteAPIView(generics.DestroyAPIView):
     queryset = Wallet.objects.all()

@@ -12,5 +12,5 @@ class WalletCreateAmountValidator:
     def __call__(self, fields):
         amount = fields.get("amount")
         if amount is not None:
-            if amount <= 0:
+            if amount < 0:
                 raise ValidationError("Сумма должна быть не ниже 0")

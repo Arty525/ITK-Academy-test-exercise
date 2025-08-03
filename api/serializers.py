@@ -14,4 +14,6 @@ class WalletSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wallet
         fields = "__all__"
-        validators = [WalletCreateAmountValidator(amount="amount"),]
+        validators = [
+            WalletCreateAmountValidator(amount="amount"),
+        ]
